@@ -2,19 +2,24 @@
 #define C60_H_
 
 #include <array>
+#include <map>
 
-#include "../colors/RGB.h"
+#include "vivid/color.h"
+
+#include "shapes/Polygon.h"
+#include "shapes/Tube.h"
+#include "shapes/Sphere.h"
 
 struct C60
 {
         C60() {}
-        C60(const std::vector<RGB>& colors_v_in, const std::vector<RGB>& colors_e_in, const std::vector<RGB>& colors_f_in)
+        C60(const std::vector<vivid::Color>& colors_v_in, const std::vector<vivid::Color>& colors_e_in, const std::vector<vivid::Color>& colors_f_in)
                 : colors_v(colors_v_in),colors_e(colors_e_in),colors_f(colors_f_in) {}
         
-        std::vector<RGB> colors_v, colors_e, colors_f;
+        std::vector<vivid::Color> colors_v, colors_e, colors_f;
 
-        double vertex_diameter = 0.1;
-        double edge_diameter = 0.05;
+        double vertex_diameter = 0.2;
+        double edge_diameter = 0.1;
         
         static constexpr double C0 = 0.809016994374947424102293417183;// = (1 + sqrt(5)) / 4;
         static constexpr double C1 = 1.61803398874989484820458683437;//  = (1 + sqrt(5)) / 2;

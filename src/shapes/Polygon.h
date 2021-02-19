@@ -7,10 +7,10 @@ class Polygon : public Surface
 {
 public:
         Polygon(const std::size_t N_in, const double r_in, const double angle_in = 0.,
-                const Point& center_in=Eigen::Vector3d::Zero(), const Point& normal_in=Eigen::Vector3d::UnitZ(), const RGB& color_in=Palette::red) :
+                const Point& center_in=Eigen::Vector3d::Zero(), const Point& normal_in=Eigen::Vector3d::UnitZ(), const vivid::Color& color_in=vivid::Color(QUVIZ_DEFAULT_COLOR)) :
                 Surface(angle_in, center_in, normal_in, color_in), N(N_in), r(r_in) {};
 
-        Polygon(const std::vector<Point>& p_in, const RGB& color_in=Palette::red) : Surface(0.,Eigen::Vector3d::Zero(),Eigen::Vector3d::Zero(),color_in) {
+        Polygon(const std::vector<Point>& p_in, const vivid::Color& color_in=vivid::Color(QUVIZ_DEFAULT_COLOR)) : Surface(0.,Eigen::Vector3d::Zero(),Eigen::Vector3d::Zero(),color_in) {
                 N = p_in.size();
                 assert(N>2 and "A polygon has to have more than two vertices");
                 Eigen::ArrayXd distances(N-1);

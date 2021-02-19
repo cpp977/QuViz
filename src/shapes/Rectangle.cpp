@@ -30,8 +30,8 @@ void Rectangle::draw(Eigen::Matrix<double, Eigen::Dynamic, 3>& V, Eigen::Matrix<
 
         auto curr_size_C = C.rows();
         C.conservativeResize(curr_size_C+2,3);
-        C.row(curr_size_C+0) = color.toEigen();
-        C.row(curr_size_C+1) = color.toEigen();
+        C.row(curr_size_C+0) << color.value()[0], color.value()[1], color.value()[2];
+        C.row(curr_size_C+1) << color.value()[0], color.value()[1], color.value()[2];
 
         this->rotate(V, curr_size_V, 4);
         this->translate(V, curr_size_V, 4);

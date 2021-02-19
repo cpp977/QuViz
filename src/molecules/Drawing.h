@@ -1,5 +1,9 @@
-#ifndef DRAWING_H_
-#define DRAWING_H_
+#ifndef MOL_DRAWING_H_
+#define MOL_DRAWING_H_
+
+#include "util/Normalization.h"
+#include "shapes/Polygon.h"
+#include "vivid/vivid.h"
 
 namespace Mol {
         template<typename Molecule>
@@ -7,7 +11,7 @@ namespace Mol {
         {
                 assert(mol.colors_v.size()==0 or mol.colors_v.size()==mol.vertices.size() or mol.colors_v.size()==1);
                 //draw black vertices if color is not given.
-                if (mol.colors_v.size() == 0) {mol.colors_v.resize(mol.vertices.size()); std::fill(mol.colors_v.begin(),mol.colors_v.end(),Palette::black);}
+                if (mol.colors_v.size() == 0) {mol.colors_v.resize(mol.vertices.size()); std::fill(mol.colors_v.begin(),mol.colors_v.end(),vivid::Color("black"));}
                 if (mol.colors_v.size() == 1) {auto c = mol.colors_v[0]; mol.colors_v.resize(mol.vertices.size()); std::fill(mol.colors_v.begin(),mol.colors_v.end(),c);}
 
                 std::vector<Sphere> sps;
@@ -23,7 +27,7 @@ namespace Mol {
         {
                 assert(mol.colors_f.size()==0 or mol.colors_f.size()==mol.faces.size() or mol.colors_f.size()==1);
                 //draw black vertices if color is not given.
-                if (mol.colors_f.size() == 0) {mol.colors_f.resize(mol.faces.size()); std::fill(mol.colors_f.begin(),mol.colors_f.end(),Palette::grey);}
+                if (mol.colors_f.size() == 0) {mol.colors_f.resize(mol.faces.size()); std::fill(mol.colors_f.begin(),mol.colors_f.end(),vivid::Color("grey"));}
                 //set constant color if one color is given.
                 if (mol.colors_f.size() == 1) {auto c = mol.colors_f[0]; mol.colors_f.resize(mol.colors_f.size()); std::fill(mol.colors_f.begin(),mol.colors_f.end(),c);}
 
@@ -46,7 +50,7 @@ namespace Mol {
         {
                 assert(mol.colors_e.size()==0 or mol.colors_e.size()==mol.edges.size() or mol.colors_e.size()==1);
                 //draw black vertices if color is not given.
-                if (mol.colors_e.size() == 0) {mol.colors_e.resize(mol.edges.size()); std::fill(mol.colors_e.begin(),mol.colors_e.end(),Palette::black);}
+                if (mol.colors_e.size() == 0) {mol.colors_e.resize(mol.edges.size()); std::fill(mol.colors_e.begin(),mol.colors_e.end(),vivid::Color("black"));}
                 //set constant color if one color is given.
                 if (mol.colors_e.size() == 1) {auto c = mol.colors_e[0]; mol.colors_e.resize(mol.colors_e.size()); std::fill(mol.colors_e.begin(),mol.colors_e.end(),c);}
 
@@ -66,31 +70,38 @@ namespace Mol {
         }
 
         template<typename Molecule>
-        void plotOneSiteObs(Molecule& mol, const Eigen::VectorXd& obs, Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C) {
-                assert(obs.size() == mol.vertices.size() and "No valid data for site observable");
-                std::vector<RGB> colv(mol.vertices.size());
-                Palette::cmap map(obs.minCoeff(),obs.maxCoeff());
+        void plotSiteObs(Molecule& mol, const Eigen::VectorXi& pos, const Eigen::VectorXd& obs,
+                         Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
+                         vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo) {
+                assert(obs.size() == mol.vertices.size() and pos.size() == obs.size() and "No valid data for site observable");
+                
+                std::vector<vivid::Color> colv(mol.vertices.size());
+                util::Normalization norm(obs.minCoeff(),obs.maxCoeff());
+                vivid::ColorMap map(map_in);
+
                 for (std::size_t i=0; i<mol.vertices.size(); i++) {
-                        colv[i] = map(obs(i));
+                        colv[pos(i)] = map.at(norm(obs(i)));
                 }
                 mol.colors_v = colv;
                 drawVertices(mol,V,F,C);
         }
 
         template<typename Molecule>
-        void plotTwoSiteObs(Molecule& mol, const Eigen::VectorXd& start, const Eigen::VectorXd& end, const Eigen::VectorXd& obs,
-                            Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C) {
-                assert(obs.size() == mol.edges.size() and "No valid data for site observable");
-                assert(start.size() == mol.edges.size() and "No valid data for site observable");
-                assert(end.size() == mol.edges.size() and "No valid data for site observable");
+        void plotBondObs(Molecule& mol, const Eigen::VectorXi& start, const Eigen::VectorXi& end, const Eigen::VectorXd& obs,
+                         Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
+                         vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo) {
+                assert(obs.size() == mol.edges.size() and "No valid data for edge observable");
+                assert(start.size() == mol.edges.size() and "No valid data for edge observable");
+                assert(end.size() == mol.edges.size() and "No valid data for edge observable");
                 for (std::size_t i=0; i<mol.edges.size(); i++) {
                         mol.edges[i][0] = start(i);
                         mol.edges[i][1] = end(i);
                 }
-                std::vector<RGB> cole(mol.edges.size());
-                Palette::cmap map(obs.minCoeff(),obs.maxCoeff());
-                for (std::size_t i=0; i<mol.vertices.size(); i++) {
-                        cole[i] = map(obs(i));
+                std::vector<vivid::Color> cole(mol.edges.size());
+                util::Normalization norm(obs.minCoeff(),obs.maxCoeff());
+                vivid::ColorMap map(map_in);
+                for (std::size_t i=0; i<mol.edges.size(); i++) {
+                        cole[i] = map.at(norm(obs(i)));
                 }
                 mol.colors_e = cole;
                 drawEdges(mol,V,F,C);

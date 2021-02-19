@@ -38,7 +38,7 @@ void Polygon::draw(Eigen::Matrix<double, Eigen::Dynamic, 3>& V, Eigen::Matrix<in
         auto curr_size_C = C.rows();
         C.conservativeResize(curr_size_C+N,3);
         for (Eigen::Index r=curr_size_C; r<C.rows(); r++) {
-                C.row(r) = color.toEigen();
+                C.row(r) << color.value()[0], color.value()[1], color.value()[2];
         }
         
         if (points.size() == 0) {

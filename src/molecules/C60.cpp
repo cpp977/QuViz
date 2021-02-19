@@ -1,10 +1,6 @@
 #include <map>
 #include <iostream>
 
-#include "../colors/Palette.h"
-#include "../Polygon.h"
-#include "../Tube.h"
-#include "../Sphere.h"
 #include "C60.h"
 
 const std::map<std::size_t, std::size_t> C60::schlegel_map_i = {

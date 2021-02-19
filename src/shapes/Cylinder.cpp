@@ -82,7 +82,7 @@ void Cylinder::draw(Eigen::Matrix<double, Eigen::Dynamic, 3>& V, Eigen::Matrix<i
         if (DRAW_BASES) { C.conservativeResize(curr_size_C+4*N,3); }
         else { C.conservativeResize(curr_size_C+2*N,3); }
         for (Eigen::Index r=curr_size_C; r<C.rows(); r++) {
-                C.row(r) = color.toEigen();
+                C.row(r) << color.value()[0], color.value()[1], color.value()[2];
         }
         
         this->rotate(V, curr_size_V, V.rows()-curr_size_V);
