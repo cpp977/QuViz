@@ -1,2 +1,2 @@
 # QuViz
-cpp visualization library for quantumphysics based on libigl
+cpp visualization library for quantum physics based on libigl
