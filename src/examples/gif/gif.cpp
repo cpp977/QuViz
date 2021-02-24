@@ -44,5 +44,6 @@ int main(int argc, char *argv[])
         gifOptions.framedelay=5;
         gifOptions.loopcount=2;
         Eigen::Vector3d axis = (std::sqrt(1./9.)*Eigen::Vector3d::UnitY()+std::sqrt(3./9.)*Eigen::Vector3d::UnitY()+std::sqrt(5./9.)*Eigen::Vector3d::UnitZ());
+        axis /= axis.norm();
         Export::GIF("C60.gif", gifOptions, 100, axis, er);
 }
