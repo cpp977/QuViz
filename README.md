@@ -19,5 +19,5 @@ Other dependencies of `QuViz` are:
 
 ## Gallery
 
-Example plot for te C60 molecule:
+Plot for the C60 molecule.
 ![C60](gallery/C60.png)
