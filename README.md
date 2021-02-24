@@ -20,4 +20,4 @@ Other dependencies of `QuViz` are:
 ## Gallery
 
 Example plot for te C60 molecule:
-![alt text](http://github.com/cpp977/QuViz/gallery/C60.png)
+![C60](gallery/C60.png)
