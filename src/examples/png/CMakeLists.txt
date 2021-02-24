@@ -11,4 +11,6 @@ target_link_libraries(
         igl::core
         igl::embree
         igl::png
-        vivid)
+        vivid
+        hdf5
+        hdf5_cpp)

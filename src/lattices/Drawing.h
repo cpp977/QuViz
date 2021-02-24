@@ -14,7 +14,37 @@ namespace Lattice {
                 if (lat.colors_v[a].size() == 0) {lat.colors_v[a].resize(lat.size()); std::fill(lat.colors_v[a].begin(),lat.colors_v[a].end(),vivid::Color("black"));}
                 if (lat.colors_v[a].size() == 1) {auto c = lat.colors_v[a][0]; lat.colors_v[a].resize(lat.size()); std::fill(lat.colors_v[a].begin(),lat.colors_v[a].end(),c);}
 
-                lat.draw([&a](std::size_t b, std::size_t c, std::size_t distance) {if (b==a and c==a and distance==0) {return true;} return false;},V,F,C);
+                std::vector<Cube> cs;
+                for (int ix=0; ix<lat.Lx; ix++)
+                for (int iy=0; iy<lat.Ly; iy++) {
+                        cs.push_back(Cube(lat.site_diameter,lat.site(ix,iy,a),lat.colors_v[a][lat.index.at(std::make_pair(ix,iy))]));
+                }
+
+                std::for_each(cs.begin(), cs.end(), [&V,&F,&C] (const Cube& c) {c.draw(V,F,C);});
+                // lat.draw_vertices(a,V,F,C);
+        }
+
+        template<typename Lattice>
+        void drawEdges(Lattice& lat, const std::size_t a, const std::size_t b,
+                       Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C)
+        {
+                assert(lat.start.size() == lat.end.size());
+
+                assert(lat.colors_e[a][b].size()==0 or lat.colors_e[a][b].size()==lat.start.size() or lat.colors_e[a][b].size()==1);
+                //draw black edges if color is not given.
+                if (lat.colors_e[a][b].size() == 0) {
+                        lat.colors_e[a][b].resize(lat.start.size()); std::fill(lat.colors_e[a][b].begin(),lat.colors_e[a][b].end(),vivid::Color("black"));}
+                if (lat.colors_e[a][b].size() == 1) {
+                        auto c = lat.colors_e[a][b][0]; lat.colors_e[a][b].resize(lat.start.size()); std::fill(lat.colors_e[a][b].begin(),lat.colors_e[a][b].end(),c);
+                }
+
+                std::vector<Tube> ts;
+                for (std::size_t edge=0; edge<lat.start.size(); edge++) {
+                        auto [ix,iy] = lat.coord[lat.start(edge)];
+                        auto [jx,jy] = lat.coord[lat.end(edge)];
+                        ts.push_back(Tube(lat.bond_diameter,lat.site(ix,iy,a),lat.site(jx,jy,b),lat.colors_e[a][b][edge]));
+                }
+                std::for_each(ts.begin(), ts.end(), [&V,&F,&C] (const Tube& t) {t.draw(V,F,C);});
         }
 
 
@@ -42,42 +72,41 @@ namespace Lattice {
         //         std::for_each(ts.begin(), ts.end(), [&V,&F,&C] (const Tube& t) {t.draw(V,F,C);});
         // }
 
-        // template<typename Molecule>
-        // void plotSiteObs(Molecule& mol, const Eigen::VectorXi& pos, const Eigen::VectorXd& obs,
-        //                  Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
-        //                  vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo) {
-        //         assert(obs.size() == mol.vertices.size() and pos.size() == obs.size() and "No valid data for site observable");
+        template<typename Lattice>
+        void plotSiteObs(Lattice& lat, const Eigen::VectorXi& pos, const Eigen::VectorXd& obs,
+                         Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
+                         const util::Normalization& norm, const vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo, std::size_t a=0) {
+                assert(obs.size() == lat.size() and pos.size() == obs.size() and "No valid data for site observable.");
                 
-        //         std::vector<vivid::Color> colv(mol.vertices.size());
-        //         util::Normalization norm(obs.minCoeff(),obs.maxCoeff());
-        //         vivid::ColorMap map(map_in);
+                std::vector<vivid::Color> colv(lat.size());
+                vivid::ColorMap map(map_in);
 
-        //         for (std::size_t i=0; i<mol.vertices.size(); i++) {
-        //                 colv[pos(i)] = map.at(norm(obs(i)));
-        //         }
-        //         mol.colors_v = colv;
-        //         drawVertices(mol,V,F,C);
-        // }
+                for (std::size_t i=0; i<lat.size(); i++) {
+                        colv[pos(i)] = map.at(norm(obs(i)));
+                }
+                lat.colors_v[a] = colv;
+                drawVertices(lat,a,V,F,C);
+        }
 
-        // template<typename Molecule>
-        // void plotBondObs(Molecule& mol, const Eigen::VectorXi& start, const Eigen::VectorXi& end, const Eigen::VectorXd& obs,
-        //                  Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
-        //                  vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo) {
-        //         assert(obs.size() == mol.edges.size() and "No valid data for edge observable");
-        //         assert(start.size() == mol.edges.size() and "No valid data for edge observable");
-        //         assert(end.size() == mol.edges.size() and "No valid data for edge observable");
-        //         for (std::size_t i=0; i<mol.edges.size(); i++) {
-        //                 mol.edges[i][0] = start(i);
-        //                 mol.edges[i][1] = end(i);
-        //         }
-        //         std::vector<vivid::Color> cole(mol.edges.size());
-        //         util::Normalization norm(obs.minCoeff(),obs.maxCoeff());
-        //         vivid::ColorMap map(map_in);
-        //         for (std::size_t i=0; i<mol.edges.size(); i++) {
-        //                 cole[i] = map.at(norm(obs(i)));
-        //         }
-        //         mol.colors_e = cole;
-        //         drawEdges(mol,V,F,C);
-        // }
+        template<typename Lattice>
+        void plotBondObs(Lattice& lat, const Eigen::VectorXi& start, const Eigen::VectorXi& end, const Eigen::VectorXd& obs,
+                         Eigen::Matrix<double,Eigen::Dynamic,3>& V, Eigen::Matrix<int,Eigen::Dynamic,3>& F, Eigen::Matrix<double,Eigen::Dynamic,3>& C,
+                         const util::Normalization& norm, const vivid::ColorMap::Preset map_in=vivid::ColorMap::Preset::Turbo,
+                         std::size_t a=0, std::size_t b=0) {                
+                assert(start.size() == obs.size() and end.size() == obs.size() and "No valid data for site observable.");
+
+                lat.start = start;
+                lat.end = end;
+                
+                std::vector<vivid::Color> colv(start.size());
+                // util::Normalization norm(obs.minCoeff(),obs.maxCoeff());
+                vivid::ColorMap map(map_in);
+
+                for (std::size_t i=0; i<start.size(); i++) {
+                        colv[i] = map.at(norm(obs(i)));
+                }
+                lat.colors_e[a][b] = colv;
+                drawEdges(lat,a,b,V,F,C);
+        }
 }
 #endif

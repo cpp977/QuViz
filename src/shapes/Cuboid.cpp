@@ -12,12 +12,12 @@ void Cuboid::draw(Eigen::Matrix<double, Eigen::Dynamic, 3>& V, Eigen::Matrix<int
         Point unit3 = Eigen::Vector3d::UnitZ();
 
         
-        Rectangle r1(b,a,0.,0.5*c*unit3,unit3,color);
-        Rectangle r2(b,a,0.,-0.5*c*unit3,-unit3,color);
-        Rectangle r3(a,c,0.,+0.5*b*unit2,unit2,color);
-        Rectangle r4(a,c,0.,-0.5*b*unit2,-unit2,color);
-        Rectangle r5(c,b,0.,+0.5*a*unit1,unit1,color);
-        Rectangle r6(c,b,0.,-0.5*a*unit1,-unit1,color);
+        Rectangle r1(b,a,color,0.,0.5*c*unit3,unit3);
+        Rectangle r2(b,a,color,0.,-0.5*c*unit3,-unit3);
+        Rectangle r3(a,c,color,0.,+0.5*b*unit2,unit2);
+        Rectangle r4(a,c,color,0.,-0.5*b*unit2,-unit2);
+        Rectangle r5(c,b,color,0.,+0.5*a*unit1,unit1);
+        Rectangle r6(c,b,color,0.,-0.5*a*unit1,-unit1);
         
         auto curr_size_V = V.rows();
         r1.draw(V,F,C);

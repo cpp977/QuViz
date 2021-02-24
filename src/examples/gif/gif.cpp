@@ -21,9 +21,10 @@ Eigen::Matrix<double,Eigen::Dynamic,3> C;
 
 int main(int argc, char *argv[])
 {
+        std::string example_data = "/home/user/__LIBS__/QuViz/example-data";
         C60 mol;
-        auto [pos1,obs1] = IO::loadSiteObs("/home/user/__LIBS__/QuViz/src/examples/C60_triplet_S.dat");
-        auto [start, end, Scorr] = IO::loadBondObs("/home/user/__LIBS__/QuViz/src/examples/C60_triplet_Scorr.dat");
+        auto [pos1,obs1] = IO::loadSiteObs(example_data+"/C60_triplet_S.dat");
+        auto [start, end, Scorr] = IO::loadBondObs(example_data+"/C60_triplet_Scorr.dat");
         Mol::plotSiteObs(mol,pos1,obs1,V,F,C,vivid::ColorMap::Preset::Viridis);
         Mol::plotBondObs(mol,start,end,Scorr,V,F,C);
         Mol::drawFaces(mol,V,F,C);

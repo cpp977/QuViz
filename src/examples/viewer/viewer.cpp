@@ -9,11 +9,16 @@
 #include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
 #include <imgui/imgui.h>
 
+#include "render/TextRenderer.h"
+#include "fonts/Digital.h"
+
 #include "IO/Io.h"
 int file_id = 0;
 #include "vivid/vivid.h"
 
-#include "lattices/Lattice2d.h"
+#include "util/ColorLegend.h"
+
+#include "lattices/TwoD.h"
 #include "lattices/LatticeDefs.h"
 #include "lattices/Drawing.h"
 
@@ -79,48 +84,50 @@ int main(int argc, char *argv[])
         double b = 0.8;
         double c = 0.6;
 
-        // std::array<Point,2> basis = {b*Eigen::Vector3d::UnitX(), b*Eigen::Vector3d::UnitY()};
-        // std::vector<double> distances(1,c); distances.push_back(b);
-        // std::vector<Point> unit_cell(2); unit_cell[0] = Eigen::Vector3d::Zero(); unit_cell[1] = -c*Eigen::Vector3d::UnitZ();
-        auto [basis, distances, unit_cell] = Lattice::make_triang(b,1,Lattice::TRIANG_TYPE::YC);
-        unit_cell.push_back(-c*Eigen::Vector3d::UnitZ());
-        distances.push_back(b); distances[1]=c;
-        // Lattice2d triang(8,8,basis,distances,unit_cell, [] (int ix, int iy) {return std::array<int,2>{ix-std::floor(static_cast<double>(iy)/2.), iy};});
-        Lattice2d triang(8,8,basis,distances,unit_cell, [] (int ix, int iy) {return std::array<int,2>{ix, iy-std::floor(static_cast<double>(ix)/2.)};});
-        triang.colors_v[0].push_back(vivid::Color("red"));
-        triang.colors_v[1].push_back(vivid::Color("blue"));
-
-        // if (type_ == LatticeType::TRIANG or type_ == LatticeType::SQUARE)
-	// {
-	// 	out = i[0]*a[0] + i[1]*a[1];
-	// }
-	// else if (type_ == LatticeType::TRIANG_XC)
-	// {
-	// 	out = (i[0]-std::floor(static_cast<double>(i[1])/2.))*a[0] + i[1]*a[1];
-	// }
-	// else if (type_ == LatticeType::TRIANG_YC)
-	// {
-	// 	out = i[0]*a[0] + (i[1]-std::floor(static_cast<double>(i[0])/2.))*a[1];
-	// }
-                
+        std::string example_data = "/home/user/__LIBS__/QuViz/example-data";
         
-        Lattice::drawVertices(triang, 0, V, F, C);
-        Lattice::drawVertices(triang, 1, V, F, C);
+        std::size_t Lx=12;
+        std::size_t Ly=6;
+        
+        Lattice::TwoD triang = Lattice::make_kondo_triang(Lx,Ly,b,c,Lattice::TRIANG_TYPE::YC);
+
+        IO::LoadInfos li(IO::LOAD_MODE::HDF5, "Sz", "5000");
+        // auto [pos0, obs0] = IO::loadSiteObs("/home/user/__LIBS__/QuViz/src/examples/viewer/Lx=12_Ly=6_Jxy=1_Jz=1_Jkxy=0.5_Jkz=0.5_Ixy=0_Iz=0.4_triangularYC_periodicY.h5",li);
+        // li.obsname = "sz";
+        // auto [pos1, obs1] = IO::loadSiteObs("/home/user/__LIBS__/QuViz/src/examples/viewer/Lx=12_Ly=6_Jxy=1_Jz=1_Jkxy=0.5_Jkz=0.5_Ixy=0_Iz=0.4_triangularYC_periodicY.h5",li);
+
+        li.obsname = "n_SdagS";
+        auto [start, end, corr] = IO::loadBondObs(example_data+"/KNM_12_6.h5",li);
+
+        // li.obsname = "kondo";
+        // auto [startK, endK, corrK] = IO::loadBondObs("/home/user/__LIBS__/QuViz/src/examples/viewer/Lx=12_Ly=6_Jxy=1_Jz=1_Jkxy=0.5_Jkz=0.5_Ixy=0_Iz=0.4_triangularYC_periodicY.h5",li);
+
+        // li.obsname = "n_sdags";
+        // auto [starte, ende, corre] = IO::loadBondObs("/home/user/__LIBS__/QuViz/src/examples/viewer/Lx=12_Ly=6_Jxy=1_Jz=1_Jkxy=0.5_Jkz=0.5_Ixy=0_Iz=0.4_triangularYC_periodicY.h5",li);
+
+        double min = corr.minCoeff();//std::min({corre.minCoeff(),corr.minCoeff(),corrK.minCoeff()});
+        double max = corr.maxCoeff();//std::max({corre.maxCoeff(),corr.maxCoeff(),corrK.maxCoeff()});
+        util::color_legend(9*Eigen::Vector3d::UnitX(), vivid::ColorMap::Preset::Turbo, min, max, V, F, C);
+        // Lattice::plotSiteObs(triang, pos0, obs0, V, F, C, util::Normalization(-0.5, 0.5), vivid::ColorMap::Preset::CoolWarm, 1);
+        // Lattice::plotSiteObs(triang, pos1, obs1, V, F, C, util::Normalization(-0.5, 0.5), vivid::ColorMap::Preset::CoolWarm, 0);
+        Lattice::plotBondObs(triang, start, end, corr, V, F, C, util::Normalization(min,max), vivid::ColorMap::Preset::Turbo, 1, 1);
+        // Lattice::plotBondObs(triang, starte, ende, corre, V, F, C, util::Normalization(min,max), vivid::ColorMap::Preset::Turbo, 0, 0);
+        // Lattice::plotBondObs(triang, startK, endK, corrK, V, F, C, util::Normalization(min,max), vivid::ColorMap::Preset::Turbo, 0, 1);
+        // Lattice::drawVertices(triang, 1, V, F, C);
         // square.draw([](std::size_t a, std::size_t b, std::size_t distance) {return (a==1 and b==1) ? false:true;}, V,F,C);
-        
-        // std::vector<Tube> ts;
-        // Eigen::Vector3d axis = (std::sqrt(1./9.)*Eigen::Vector3d::UnitY()+std::sqrt(3./9.)*Eigen::Vector3d::UnitY()+std::sqrt(5./9.)*Eigen::Vector3d::UnitZ());
-        // axis /= axis.norm();
-        // ts.push_back(Tube(5*b,Eigen::Vector3d::Zero(),5.*axis,vivid::Color("green")));
-        
-        // ts.push_back(Tube(b,Eigen::Vector3d::Zero(),5.*Eigen::Vector3d::UnitX(),vivid::Color("purple")));
-        // ts.push_back(Tube(b,Eigen::Vector3d::Zero(),5.*Eigen::Vector3d::UnitY(),vivid::Color("red")));
-        // ts.push_back(Tube(b,Eigen::Vector3d::Zero(),5.*Eigen::Vector3d::UnitZ(),vivid::Color("blue")));
-
-        // std::for_each(ts.begin(), ts.end(), [] (const Tube& t) {t.draw(V,F,C);});
 
         std::cout << V.rows() << ", " << F.rows() << ", " << C.rows() << std::endl;
 
+        // FontOptions bold; bold.bold=true;
+        // FontOptions normal;
+        // Digital d2(normal);
+        // TextRenderer<Digital> t2(d2, 0.*Eigen::Vector3d::UnitX());
+        // t2 << -123456789;
+        // t2.render(V,F,C);
+        // t2.font().opt.size=0.5;
+        // std::cout << t2.font().opt.size << std::endl;
+        // t2.set_center(2.*Eigen::Vector3d::UnitY());
+        // t2.render(V,F,C);
         // Plot the mesh
         igl::opengl::glfw::Viewer viewer;
         viewer.callback_key_down = &key_down;
@@ -130,6 +137,22 @@ int main(int argc, char *argv[])
         viewer.data().set_mesh(V, F);
         viewer.data().set_colors(C);
         viewer.data().show_lines = false;
+        viewer.data().show_custom_labels = false;
+
+        // vivid::ColorMap m(vivid::ColorMap::Preset::Turbo);
+        // double offset = 0.6;
+        // double height = 20./m.numStops();
+        // std::stringstream ss;
+        // double min = corre.minCoeff();
+        // double max = corre.maxCoeff();
+        // for (std::size_t i=0; i<m.numStops(); i++) {
+        //         (i < m.numStops()-1) ? ss << std::fixed << min+static_cast<double>(i)*(max-min)/static_cast<double>(m.numStops()) << "\n" : ss << min+static_cast<double>(i)*(max-min)/static_cast<double>(m.numS
+        //tops());
+                // std::cout << "i=" << i << ", " << ss.str() << std::endl;
+                // viewer.data().add_label(offset*Eigen::Vector3d::UnitX() + i*height*Eigen::Vector3d::UnitY(),ss.str());
+        //}
+        //                std::cout << vivid::ansi::colorize( ss.str(), m ) << std::endl;
+
         // viewer.core().is_animating = false;
         // viewer.core().animation_max_fps = 10;
         viewer.launch();

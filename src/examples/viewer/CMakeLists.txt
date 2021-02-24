@@ -12,4 +12,6 @@ target_link_libraries(
         igl::opengl_glfw
         igl::png
         igl::opengl_glfw_imgui
-        vivid)
+        vivid
+        hdf5
+        hdf5_cpp)
