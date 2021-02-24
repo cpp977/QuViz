@@ -15,7 +15,7 @@ cmake ../QuViz
 libigl should be downloaded in a parallel folder.
 Other dependencies of `QuViz` are:
 - [vivid](https://github.com/gurki/vivid) for color support.
-- [hdf5](https://www.hdfgroup.org/solutions/hdf5/)
+- [hdf5](https://www.hdfgroup.org/solutions/hdf5/) for IO with hdf5 files.
 
 ## Gallery
 
