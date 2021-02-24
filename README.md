@@ -13,4 +13,11 @@ cmake ../QuViz
 
 `QuViz`  depends on [libigl](https://github.com/libigl/libigl).
 libigl should be downloaded in a parallel folder.
+Other dependencies of `QuViz` are:
+-[vivid](https://github.com/gurki/vivid) for color support.
+-[hdf5](https://www.hdfgroup.org/solutions/hdf5/)
 
+## Gallery
+
+Example plot for te C60 molecule:
+![alt text](http://github.com/cpp977/QuViz/gallery/C60.png)
