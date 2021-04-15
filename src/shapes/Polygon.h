@@ -22,6 +22,7 @@ public:
                 std::vector<std::size_t> used_indices;
                 used_indices.push_back(0);
                 std::size_t index;
+                if (N == 3) {points = p_in; return;}
                 for (std::size_t i=1; i<N; i++) {
                         for (std::size_t j=0; j<N; j++) {
                                 if (auto it = std::find(used_indices.begin(), used_indices.end(), j); it != used_indices.end()) {continue;}

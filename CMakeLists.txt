@@ -28,6 +28,7 @@ option(LIBIGL_WITH_EMBREE            "Use Embree"         ON)
 option(LIBIGL_WITH_PNG               "Use png"            ON)
 option(LIBIGL_WITH_XML               "Use xml"            OFF)
 option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui"          ON)
+option(LIBIGL_WITH_STL               "Use stl"            ON)
 
 find_package(LIBIGL REQUIRED QUIET)
 
@@ -60,3 +61,7 @@ include(cmake/addGitLibs.cmake)
 option(QUVIZ_BUILD_EXAMPLES     "Build examples"    ON)
 
 add_subdirectory(src)
+
+if (QUVIZ_BUILD_EXAMPLES)
+add_subdirectory(examples)
+endif()

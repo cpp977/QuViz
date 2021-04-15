@@ -42,8 +42,8 @@ struct Digital
         FontOptions opt;
         double aspect_ratio=0.5;
         double space_ratio=0.15;
-        double line_width_ratio = 0.08;
-        double bold_line_width_ratio = 0.14;
+        double line_width_ratio = 0.1;
+        double bold_line_width_ratio = 0.15;
         double width() const { return aspect_ratio*opt.size; } 
         double height() const { return opt.size; }
         double delta() const { return space_ratio*opt.size; }
