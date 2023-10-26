@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20)
 project(QuViz)
 
 include(cmake/StandardProjectSettings.cmake)
 
 include(cmake/PreventInSourceBuilds.cmake)
-
-#set(CMAKE_CXX_FLAGS -stdlib=libc++)
-#set(MAKE_EXE_LINKER_FLAGS "-stdlib=libc++")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -21,16 +18,24 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
  endif()
 endif()
 
-# libigl
-option(LIBIGL_WITH_OPENGL            "Use OpenGL"         ON)
-option(LIBIGL_WITH_OPENGL_GLFW       "Use GLFW"           ON)
-option(LIBIGL_WITH_EMBREE            "Use Embree"         ON)
-option(LIBIGL_WITH_PNG               "Use png"            ON)
-option(LIBIGL_WITH_XML               "Use xml"            OFF)
-option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui"          ON)
-option(LIBIGL_WITH_STL               "Use stl"            ON)
+include(libigl)
 
-find_package(LIBIGL REQUIRED QUIET)
+# libigl
+igl_include(glfw)
+igl_include(embree)
+igl_include(imgui)
+igl_include(opengl)
+igl_include(stb)
+#igl_include(predicates)
+#igl_include(xml)
+#igl_include(copyleft cgal)
+#igl_include(copyleft comiso)
+#igl_include(copyleft core)
+#igl_include(copyleft cork)
+#igl_include(copyleft tetgen)
+#igl_include(restricted matlab)
+#igl_include(restricted mosek)
+#igl_include(restricted triangle)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
@@ -46,13 +51,9 @@ add_library(project_warnings INTERFACE)
 include(cmake/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
-#git is required to clone libraries used from github/gitlab
 find_package(Git REQUIRED)
 find_package(Boost REQUIRED)
 
-set( CMAKE_PREFIX_PATH "/home/user/__LIBS__/vivid/build/;/home/user/__LIBS__/vivid/dependencies/json" )
-
-find_package(vivid REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(glm REQUIRED)
 

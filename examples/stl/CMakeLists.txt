@@ -9,6 +9,6 @@ target_link_libraries(
         project_options
         project_warnings
         igl::core
-        vivid
+		vivid
         hdf5
         hdf5_cpp)

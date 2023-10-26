@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include <igl/png/render_to_png.h>
-#include <igl/png/writePNG.h>
+#include <igl/stb/write_image.h>
 #include <igl/embree/EmbreeRenderer.h>
 
 #include "util/Export.h"

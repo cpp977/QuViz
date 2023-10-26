@@ -9,9 +9,10 @@ target_link_libraries(
         project_options
         project_warnings
         igl::core
-        igl::opengl_glfw
-        igl::png
-        igl::opengl_glfw_imgui
-        vivid
+		igl::opengl
+		igl::glfw
+		igl::imgui
+		igl::stb
+		vivid
         hdf5
         hdf5_cpp)

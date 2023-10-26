@@ -66,7 +66,7 @@ namespace Export {
                 er.render_buffer(R,G,B,A);
 
                 // save to PNG file
-                igl::png::writePNG(R,G,B,A,filename);
+                igl::stb::write_image(filename,R,G,B,A,0);
         }
 
 }

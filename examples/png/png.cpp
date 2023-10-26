@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include <igl/png/render_to_png.h>
-#include <igl/png/writePNG.h>
+#include <igl/stb/write_image.h>
 #include <igl/embree/EmbreeRenderer.h>
 
 #include "util/ColorLegend.h"
@@ -24,7 +23,7 @@ Eigen::Matrix<double,Eigen::Dynamic,3> C;
 
 int main(int argc, char* argv[])
 {
-    std::string example_data = "/home/user/__LIBS__/QuViz/example-data";
+    std::string example_data = "/home/mpeschke/__LIBS__/QuViz/example-data";
     C60 mol;
     mol.colors_f.resize(mol.faces.size());
     for(std::size_t i = 0; i < mol.faces.size(); i++) { mol.colors_f[i] = (i < 14) ? vivid::Color("grey") : vivid::Color("blue"); }

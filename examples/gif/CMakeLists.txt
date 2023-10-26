@@ -10,7 +10,7 @@ target_link_libraries(
         project_warnings
         igl::core
         igl::embree
-        igl::png
-        vivid
+		igl::stb
+		vivid
         hdf5
         hdf5_cpp)
