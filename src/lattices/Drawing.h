@@ -3,6 +3,8 @@
 
 #include "util/Normalization.h"
 #include "shapes/Polygon.h"
+#include "shapes/Cube.h"
+#include "shapes/Arrow.h"
 #include "vivid/vivid.h"
 
 namespace Lattice {
@@ -39,11 +41,18 @@ namespace Lattice {
                 }
 
                 std::vector<Tube> ts;
-                for (std::size_t edge=0; edge<lat.start.size(); edge++) {
-                        auto [ix,iy] = lat.coord[lat.start(edge)];
-                        auto [jx,jy] = lat.coord[lat.end(edge)];
-                        ts.push_back(Tube(lat.bond_diameter,lat.site(ix,iy,a),lat.site(jx,jy,b),lat.colors_e[a][b][edge]));
-                }
+				for(std::size_t dist = 0; dist < lat.neighbors.size(); ++dist) {
+					for(int ix = 0; ix < lat.Lx; ix++) {
+						for(int iy = 0; iy < lat.Ly; iy++) {
+							for(std::size_t num = 0; num < lat.neighbors[dist][lat.site_number(ix, iy, a)].size(); ++num) {
+								auto [jx, jy, bp] = lat.neighbors[dist][lat.site_number(ix, iy, a)][num];
+								if(bp != b) { continue; }
+								ts.push_back(Tube(lat.bond_diameter, lat.site(ix, iy, a), lat.site(jx, jy, b), lat.colors_e[a][b][0]));
+							}
+						}
+					}
+				}
+				std::cout << "#tubes: " << ts.size() << std::endl;
                 std::for_each(ts.begin(), ts.end(), [&V,&F,&C] (const Tube& t) {t.draw(V,F,C);});
         }
 
@@ -87,6 +96,73 @@ namespace Lattice {
                 lat.colors_v[a] = colv;
                 drawVertices(lat,a,V,F,C);
         }
+
+	template <typename Lattice>
+void plotVecSiteObs(Lattice& lat,
+                    const std::array<Eigen::VectorXd, 3>& obs,
+                    Eigen::Matrix<double, Eigen::Dynamic, 3>& V,
+                    Eigen::Matrix<int, Eigen::Dynamic, 3>& F,
+                    Eigen::Matrix<double, Eigen::Dynamic, 3>& C,
+                    std::size_t a = 0,
+                    double length_scale_f = 1.)
+{
+    assert(obs[0].size() == lat.size() and pos.size() == obs[0].size() and "No valid data for site observable.");
+
+    assert(lat.colors_v[a].size() == 0 or lat.colors_v[a].size() == lat.size() or lat.colors_v[a].size() == 1);
+    // draw black vertices if color is not given.
+    if(lat.colors_v[a].size() == 0) {
+        lat.colors_v[a].resize(lat.size());
+        std::fill(lat.colors_v[a].begin(), lat.colors_v[a].end(), vivid::Color("black"));
+    }
+    if(lat.colors_v[a].size() == 1) {
+        auto c = lat.colors_v[a][0];
+        lat.colors_v[a].resize(lat.size());
+        std::fill(lat.colors_v[a].begin(), lat.colors_v[a].end(), c);
+    }
+
+    std::vector<Arrow> arrs;
+    if constexpr(Lattice::dim == 2) {
+        for(int ix = 0; ix < lat.Lx; ix++) {
+            for(int iy = 0; iy < lat.Ly; iy++) {
+                auto i = lat.site_number(ix, iy, a);
+                Eigen::Vector3d mag;
+                mag << obs[0](i), obs[1](i), obs[2](i);
+                auto length = mag.norm();
+                Eigen::Vector3d mag_normalized = mag / length;
+                Eigen::Vector3d axis = Eigen::Vector3d::UnitZ().cross(mag_normalized);
+                axis /= axis.norm();
+
+                double angle = std::acos(Eigen::Vector3d::UnitZ().dot(mag_normalized));
+                arrs.push_back(Arrow(/*height=*/length_scale_f * length,
+                                     /*radius=*/0.03,
+                                     /*radius_hat=*/0.06,
+                                     /*ratio hat/cylinder*/ 0.3,
+                                     /*axis*/ axis,
+                                     /*angle*/ angle,
+                                     lat.site(ix, iy, a),
+                                     lat.colors_v[a][lat.index.at(std::make_pair(ix, iy))]));
+            }
+        }
+    } else if constexpr(Lattice::dim == 3) {
+        for(int ix = 0; ix < lat.Lx; ix++) {
+            for(int iy = 0; iy < lat.Ly; iy++) {
+                for(int iz = 0; iz < lat.Lz; iz++) {
+                    int random_variable = std::rand();
+                    double random_angle = static_cast<double>(random_variable) / static_cast<double>(RAND_MAX) * M_PI;
+                    arrs.push_back(Arrow(0.3,
+                                         0.03,
+                                         0.06,
+                                         0.3,
+                                         Eigen::Vector3d::UnitX(),
+                                         random_angle,
+                                         lat.site(ix, iy, iz, a),
+                                         lat.colors_v[a][lat.index.at(std::make_tuple(ix, iy, iz))]));
+                }
+            }
+        }
+    }
+    std::for_each(arrs.begin(), arrs.end(), [&V, &F, &C](const Arrow& arr) { arr.draw(V, F, C); });
+}
 
         template<typename Lattice>
         void plotBondObs(Lattice& lat, const Eigen::VectorXi& start, const Eigen::VectorXi& end, const Eigen::VectorXd& obs,
