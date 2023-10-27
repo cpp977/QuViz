@@ -56,12 +56,16 @@ namespace Export {
                 ganim.GifEnd(&g);
         }
 
-        void PNG(const std::string& filename, const FileFormats::PNGOptions& pngOptions, const double& angle, const Eigen::Vector3d& axis, igl::embree::EmbreeRenderer& er) {
+        void PNG(const std::string& filename, const FileFormats::PNGOptions& pngOptions, const double& angle, const double& zoom, const Eigen::Vector3d& axis, igl::embree::EmbreeRenderer& er) {
                 Eigen::Matrix<unsigned char,Eigen::Dynamic,Eigen::Dynamic> R(pngOptions.width,pngOptions.height);
                 Eigen::Matrix<unsigned char,Eigen::Dynamic,Eigen::Dynamic> G(pngOptions.width,pngOptions.height);
                 Eigen::Matrix<unsigned char,Eigen::Dynamic,Eigen::Dynamic> B(pngOptions.width,pngOptions.height);
                 Eigen::Matrix<unsigned char,Eigen::Dynamic,Eigen::Dynamic> A(pngOptions.width,pngOptions.height);
-                
+
+				Eigen::Matrix3d rot;
+				rot = Eigen::AngleAxisd(angle, axis);
+				er.set_rot(rot);
+				er.set_zoom(zoom);
                 // Draw the scene in the buffers
                 er.render_buffer(R,G,B,A);
 
